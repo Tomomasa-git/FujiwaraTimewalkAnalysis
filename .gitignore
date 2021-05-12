@@ -30,3 +30,25 @@
 *.exe
 *.out
 *.app
+
+# Root Files
+*.root
+
+# Binary
+/bin/*
+
+# Library
+/lib/*
+
+# Figure
+/fig/*
+*.pdf
+*.png
+*.eps
+
+# Vim
+*.swp
+
+# VS Code
+.vscode/*
+.build
