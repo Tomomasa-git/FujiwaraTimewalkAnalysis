@@ -12,14 +12,14 @@ ROOTGLIBS = $(shell root-config --glibs)
 CXXFLAGS = -Wall -O2 $(ROOTFLAGS)
 CXXLIBS  = $(ROOTLIBS)
 
-#TARGET1 = GetPede   Setting
-#OBJS1   = GetPede.o Setting.o
+TARGET1 = GetPede   Setting
+OBJS1   = GetPede.o Setting.o
 #TARGET1 = DrawTQ   Setting
 #OBJS1   = DrawTQ.o Setting.o
 #TARGET1 = MakeTree   Setting
 #OBJS1   = MakeTree.o Setting.o
-TARGET1 = Twlk_Ana   Setting
-OBJS1   = Twlk_Ana.o Setting.o
+#TARGET1 = Twlk_Ana   Setting
+#OBJS1   = Twlk_Ana.o Setting.o
 
 all: $(TARGET1)
 
