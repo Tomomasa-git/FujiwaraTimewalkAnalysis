@@ -148,6 +148,7 @@ class Twlk_Ana{
 		TGraph* gr_twlkfact;
 		TGraph* gr_twlkfact_Chis;
 
+		TFrame* fr_1d_QDC[NofDet];
 		TFrame* fr_2d_rawtq[NofDet];
 		TFrame* fr_2d_rawtq_fit[NofDet];
 		TFrame* fr_2d_dectq_full[NofDet];

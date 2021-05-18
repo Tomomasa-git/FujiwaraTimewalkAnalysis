@@ -445,8 +445,8 @@ void Twlk_Ana::DefineObj(){
 			}else;
 		}else;
 
-		Leg_qdc[i] = new TLegend( .55, .65, .85, .95, "#font[62]{Trigger Type} #scale[0.75]{(Eff.Ent./Total Event)}");
-		MySetting->Setting_Legend( Leg_qdc[i], 42, 22, 602, 0.040 );
+		Leg_qdc[i] = new TLegend( .45, .60, .90, .90, "#font[62]{Trigger Type} #scale[0.75]{(Eff.Ent./Total Event)}");
+		MySetting->Setting_Legend( Leg_qdc[i], 42, 12, 602, 0.040 );
 	//	Leg_qdc[i]->SetTextSize(0);
 		Leg_qdc[i]->SetBorderSize(0);
 		Leg_qdc[i]->SetLineWidth(0);
@@ -652,21 +652,30 @@ void Twlk_Ana::Draw(){
 		h_1d_qdc_full[i]->SetStats(kFALSE);
 		h_1d_qdc_wcut[i]->SetStats(kFALSE);
 		h_1d_qdc_qcut[i]->SetStats(kFALSE);
-		Leg_qdc[i]->AddEntry( h_1d_qdc_full[i], Form("Full Event: %.0lf/%.0lf"               , h_1d_qdc_full[i]->GetEffectiveEntries(), Ent), "l");
-		Leg_qdc[i]->AddEntry( h_1d_qdc_wcut[i], Form("Ref1 #otimes Ref2: %.0lf/%.0lf"        , h_1d_qdc_wcut[i]->GetEffectiveEntries(), Ent), "fl");
-		Leg_qdc[i]->AddEntry( h_1d_qdc_qcut[i], Form("Ref1 #otimes Ref2 w/ QDC Cut: %.0lf/%d", h_1d_qdc_qcut[i]->GetEffectiveEntries(), Ent), "fl");
+		Leg_qdc[i]->AddEntry( h_1d_qdc_full[i], Form("Full Event: #scale[0.85]{(%.0lf/%d)}"                  , h_1d_qdc_full[i]->GetEffectiveEntries(), Ent), "l" );
+		Leg_qdc[i]->AddEntry( h_1d_qdc_wcut[i], Form("Ref1 #otimes Ref2: #scale[0.85]{(%.0lf/%d)}"           , h_1d_qdc_wcut[i]->GetEffectiveEntries(), Ent), "fl");
+		Leg_qdc[i]->AddEntry( h_1d_qdc_qcut[i], Form("Ref1 #otimes Ref2 w/ QDC Cut: #scale[0.85]{(%.0lf/%d)}", h_1d_qdc_qcut[i]->GetEffectiveEntries(), Ent), "fl");
 		h_1d_qdc_full[i]->Draw("");
 		h_1d_qdc_wcut[i]->Draw("same");
+		h_1d_qdc_qcut[i]->Draw("same");
 		gPad->Update();
 		gPad->Modified();
+		fr_1d_QDC[i] = gPad->GetFrame();
+		fr_1d_QDC[i]->SetFillStyle(0);
+		fr_1d_QDC[i]->Draw();
 		Leg_qdc[i]->Draw();
+		Lat->SetTextColor(2);
+		Lat->SetTextFont(62);
+		Lat->DrawLatexNDC( 0.70,0.45, Form("QDC peak = %.1lf pC", TwlkQDCPeak[i]));
+		Lat->SetTextColor(602);
+		Lat->SetTextFont(42);
 	
 		Ca[0]->cd(i+3);
 		gPad->SetLogy(1);
 		h_1d_tdc_full[i]->SetStats(kFALSE);
 		h_1d_tdc_wcut[i]->SetStats(kFALSE);
-		Leg_tdc[i]->AddEntry( h_1d_qdc_full[i], Form("Full Event: %.0lf/%.0lf"        , h_1d_tdc_full[i]->GetEffectiveEntries(), h_1d_tdc_full[i]->GetEntries()), "fl");
-		Leg_tdc[i]->AddEntry( h_1d_qdc_wcut[i], Form("Ref1 #otimes Ref2: %.0lf/%.0lf", h_1d_tdc_wcut[i]->GetEffectiveEntries(), h_1d_tdc_wcut[i]->GetEntries()), "fl");
+		Leg_tdc[i]->AddEntry( h_1d_tdc_full[i], Form("Full Event: %.0lf/%d"       , h_1d_tdc_full[i]->GetEffectiveEntries(), Ent), "l");
+		Leg_tdc[i]->AddEntry( h_1d_tdc_wcut[i], Form("Ref1 #otimes Ref2: %.0lf/%d", h_1d_tdc_wcut[i]->GetEffectiveEntries(), Ent), "fl");
 		h_1d_tdc_full[i]->Draw("");
 		h_1d_tdc_wcut[i]->Draw("same");
 		gPad->Update();
@@ -759,9 +768,6 @@ void Twlk_Ana::SearchBest(){
 				decTime[1] = Ref[1].t+Twlk_Correction( Ref[1].e, Twlk[1], TwlkFactor[1], Ref2TwlkMode );
 				dtof = decTime[0]-decTime[1];
 				h_1d_dectof_tmp->Fill(dtof);
-				for(int seg=0; seg<NofDet; seg++){
-					h_2d_dectq_tmp[seg]->Fill(Ref[seg].e, dtof);
-				}
 			}
 
 			Ca_dummy = new TCanvas( "Ca_dummy", "Ca_dummy", 482, 264 );
@@ -983,6 +989,7 @@ void Twlk_Ana::Export(){
 	}
 	for(int i=0; i<NofDet; i++)h_1d_qdc_full[i]    -> Write( Form("h_1d_qdc_full_%02d"   , i));
 	for(int i=0; i<NofDet; i++)h_1d_qdc_wcut[i]    -> Write( Form("h_1d_qdc_wcut_%02d"   , i));
+	for(int i=0; i<NofDet; i++)h_1d_qdc_qcut[i]    -> Write( Form("h_1d_qdc_qcut_%02d"   , i));
 	for(int i=0; i<NofDet; i++)h_1d_tdc_full[i]    -> Write( Form("h_1d_tdc_full_%02d"   , i));
 	for(int i=0; i<NofDet; i++)h_1d_tdc_wcut[i]    -> Write( Form("h_1d_tdc_wcut_%02d"   , i));
 	for(int i=0; i<NofDet; i++)h_2d_rawtq[i]       -> Write( Form("h_2d_rawtq_%02d"      , i));
@@ -1022,12 +1029,12 @@ void Twlk_Ana::Export(){
 		////Ref1
 		Ex_Ref1.tdc = Ref[0].tdc;
 		Ex_Ref1.qdc = Ref[0].qdc;
-		Ex_Ref1.t   = Ref[0].t-Twlk_Correction( Ref[0].e, Twlk[0], TwlkFactor[0], Ref1TwlkMode );
+		Ex_Ref1.t   = Ref[0].t-Twlk_Correction( Ref[0].e, Twlk[0], TwlkFact_Best[0], Ref1TwlkMode );
 		Ex_Ref1.e   = Ref[0].e;
 		////Ref2
 		Ex_Ref2.tdc = Ref[1].tdc;
 		Ex_Ref2.qdc = Ref[1].qdc;
-		Ex_Ref2.t   = Ref[1].t+Twlk_Correction( Ref[1].e, Twlk[1], TwlkFactor[1], Ref2TwlkMode );
+		Ex_Ref2.t   = Ref[1].t+Twlk_Correction( Ref[1].e, Twlk[1], TwlkFact_Best[1], Ref2TwlkMode );
 		Ex_Ref2.e   = Ref[1].e;
 		for(int seg=0; seg<32; seg++){
 			tdc_Ex[seg]=tdc[seg];
