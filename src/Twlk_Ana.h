@@ -161,7 +161,16 @@ class Twlk_Ana{
 		TF1* f_tof_tmp;
 		TF1* f_const_tmp[NofDet];
 
+		TLine* Ln_RefQDCPeak[NofDet];
+		TLine* Ln_RefQDCPeakFor1D[NofDet];
 		TLine* Ln_RefQDCCut[NofDet];
+		TLine* Ln_RefQDCCutForFit[NofDet][2];
+		//First index:
+		//0: Ref1
+		//1: Ref2
+		//Second index:
+		//0: Upper Limit
+		//1: Lower Limit
 
 		TLegend* Leg_qdc[NofDet];
 		TLegend* Leg_tdc[NofDet];

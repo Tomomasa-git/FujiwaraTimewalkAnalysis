@@ -393,12 +393,16 @@ void Twlk_Ana::ImportPedestal(){
 
 //--------------------------------------------------------------------------------------------------
 void Twlk_Ana::DefineCanv(){
-	for(int i=0; i<NofCanv-4; i++){Ca[i] = new TCanvas( Form("Ca[%d]",i), Form("Ca[%d]",i), 1602, 824 );}
+	for(int i=0; i<NofCanv-4; i++){Ca[i] = new TCanvas( Form("Ca[%d]",i), Form("Ca[%d]",i), 1602, 864 );}
 	Ca[NofCanv-4] = new TCanvas( Form("Ca[%d]", NofCanv-4), Form("Ca[%d]", NofCanv-4), 1602, 1624 );
 	Ca[NofCanv-3] = new TCanvas( Form("Ca[%d]", NofCanv-3), Form("Ca[%d]", NofCanv-3), 1602, 1624 );
 	Ca[NofCanv-2] = new TCanvas( Form("Ca[%d]", NofCanv-2), Form("Ca[%d]", NofCanv-2), 1602, 1624 );
 	Ca[NofCanv-1] = new TCanvas( Form("Ca[%d]", NofCanv-1), Form("Ca[%d]", NofCanv-1), 1602, 1624 );
 	Ca[0]->Divide(2,2);
+	for(int i=0; i<4; i++){
+		Ca[0]->cd(i+1);
+		gPad->SetRightMargin(.080);
+	}
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -410,8 +414,8 @@ void Twlk_Ana::DefineObj(){
 		h_1d_qdc_full[i] = new TH1D( Form("h_1d_qdc_full[%d]",i), Form("h_1d_qdc_full[%d]",i), TwlkQDCNBin, -10., TwlkQDCMax );
 		h_1d_qdc_wcut[i] = new TH1D( Form("h_1d_qdc_wcut[%d]",i), Form("h_1d_qdc_wcut[%d]",i), TwlkQDCNBin, -10., TwlkQDCMax );
 		h_1d_qdc_qcut[i] = new TH1D( Form("h_1d_qdc_qcut[%d]",i), Form("h_1d_qdc_qcut[%d]",i), TwlkQDCNBin, -10., TwlkQDCMax );
-		h_1d_tdc_full[i] = new TH1D( Form("h_1d_tdc_full[%d]",i), Form("h_1d_tdc_full[%d]",i), 4100, 100., 4200. );
-		h_1d_tdc_wcut[i] = new TH1D( Form("h_1d_tdc_wcut[%d]",i), Form("h_1d_tdc_wcut[%d]",i), 4100, 100., 4200. );
+		h_1d_tdc_full[i] = new TH1D( Form("h_1d_tdc_full[%d]",i), Form("h_1d_tdc_full[%d]",i), 4300, -100., 4200. );
+		h_1d_tdc_wcut[i] = new TH1D( Form("h_1d_tdc_wcut[%d]",i), Form("h_1d_tdc_wcut[%d]",i), 4300, -100., 4200. );
 		MySetting->Setting_Hist1D( h_1d_qdc_full[i], Form("run%04d: ", RunNum)+Label[CHassign[i]]+" QDC"               , Label[CHassign[i]]+" QDC (pC)"       , Form("Counts/%.2lf pC", TwlkQDCDiv), 602, 1, 42, 616, 0    );
 		MySetting->Setting_Hist1D( h_1d_qdc_wcut[i], Form("run%04d: ", RunNum)+Label[CHassign[i]]+" QDC w/ TDC Cut"    , Label[CHassign[i]]+" QDC (pC)"       , Form("Counts/%.2lf pC", TwlkQDCDiv), 602, 1, 42, 422, 1001 );
 		MySetting->Setting_Hist1D( h_1d_qdc_qcut[i], Form("run%04d: ", RunNum)+Label[CHassign[i]]+" QDC w/ TDC+QDC Cut", Label[CHassign[i]]+" QDC (pC)"       , Form("Counts/%.2lf pC", TwlkQDCDiv), 602, 1, 42, 5  , 1001 );
@@ -447,17 +451,19 @@ void Twlk_Ana::DefineObj(){
 
 		Leg_qdc[i] = new TLegend( .45, .60, .90, .90, "#font[62]{Trigger Type} #scale[0.75]{(Eff.Ent./Total Event)}");
 		MySetting->Setting_Legend( Leg_qdc[i], 42, 12, 602, 0.040 );
-	//	Leg_qdc[i]->SetTextSize(0);
 		Leg_qdc[i]->SetBorderSize(0);
 		Leg_qdc[i]->SetLineWidth(0);
-		Leg_qdc[i]->SetFillStyle(0);
+		Leg_qdc[i]->SetFillColor(0);
+		Leg_qdc[i]->SetFillStyle(1001);
+		Leg_qdc[i]->SetFillColorAlpha(0, 0.45);
 
-		Leg_tdc[i] = new TLegend( .55, .65, .85, .95, "Trigger Type: Effective Ent./Total Ent.");
+		Leg_tdc[i] = new TLegend( .58, .60, .90, .90, "Trigger Type: #scale[0.80]{Effective Ent./Total Ent.}");
 		MySetting->Setting_Legend( Leg_tdc[i], 42, 22, 602, 0.040 );
-	//	Leg_tdc[i]->SetTextSize(0);
 		Leg_tdc[i]->SetBorderSize(0);
 		Leg_tdc[i]->SetLineWidth(0);
-		Leg_tdc[i]->SetFillStyle(0);
+		Leg_tdc[i]->SetFillColor(0);
+		Leg_tdc[i]->SetFillStyle(1001);
+		Leg_tdc[i]->SetFillColorAlpha(0, 0.45);
 
 		Pt[i] = new TPaveText();
 		Pt[i] -> SetX1NDC(.675);
@@ -471,8 +477,17 @@ void Twlk_Ana::DefineObj(){
 		Pt[i] -> SetLineWidth(1);
 		Pt[i] -> SetLineStyle(1);
 
-		Ln_RefQDCCut[i] = new TLine();
-		MySetting->Setting_Line( Ln_RefQDCCut[i], 602, 1, 4 );
+		Ln_RefQDCPeak[i]      = new TLine();
+		Ln_RefQDCPeakFor1D[i] = new TLine();
+		Ln_RefQDCCut[i] = new TLine();	//0: Upper Limit
+		Ln_RefQDCCutForFit[i][0] = new TLine();	//1: Lower Limit
+		Ln_RefQDCCutForFit[i][1] = new TLine();	//1: Lower Limit
+
+		MySetting->Setting_Line( Ln_RefQDCPeak[i]           , 633, 1, 2 );
+		MySetting->Setting_Line( Ln_RefQDCPeakFor1D[i]      , 2  , 1, 2 );
+		MySetting->Setting_Line( Ln_RefQDCCutForFit[i][0]   , 602, 1, 4 );
+		MySetting->Setting_Line( Ln_RefQDCCutForFit[i][1]   , 602, 1, 4 );
+		MySetting->Setting_Line( Ln_RefQDCCut[i]            , 602, 1, 4 );
 	}
 	h_1d_rawtof      = new TH1D( "h_1d_rawtof"     , "h_1d_rawtof"     , 400, -7., 7.);
 	h_1d_dectof_full = new TH1D( "h_1d_dectof_full", "h_1d_dectof_full", 200, -3.5, 3.5);
@@ -616,6 +631,22 @@ void Twlk_Ana::FillHist(){
 		TwlkQDCCutForFit[i][1] = 1.80*TwlkQDCPeak[i];
 	}
 
+	for(int i=0; i<NofDet; i++){
+		Ln_RefQDCPeak[i]->SetX1(TwlkQDCPeak[i]);
+		Ln_RefQDCPeak[i]->SetX2(TwlkQDCPeak[i]);
+		Ln_RefQDCPeak[i]->SetY1(-7.);
+		Ln_RefQDCPeak[i]->SetY2( 7.);
+		Ln_RefQDCPeakFor1D[i]->SetX1(TwlkQDCPeak[i]);
+		Ln_RefQDCPeakFor1D[i]->SetX2(TwlkQDCPeak[i]);
+
+		for(int j=0; j<2; j++){
+			Ln_RefQDCCutForFit[i][j]->SetX1(TwlkQDCCutForFit[i][j]);
+			Ln_RefQDCCutForFit[i][j]->SetX2(TwlkQDCCutForFit[i][j]);
+			Ln_RefQDCCutForFit[i][j]->SetY1(-7.);
+			Ln_RefQDCCutForFit[i][j]->SetY2( 7.);
+		}
+	}
+
 	for(int i=0; i<MaxEventItr; i++){
 		tree->GetEntry(EffectiveEvent[i]);
 		rtof = Ref[0].t-Ref[1].t;
@@ -666,9 +697,14 @@ void Twlk_Ana::Draw(){
 		Leg_qdc[i]->Draw();
 		Lat->SetTextColor(2);
 		Lat->SetTextFont(62);
-		Lat->DrawLatexNDC( 0.70,0.45, Form("QDC peak = %.1lf pC", TwlkQDCPeak[i]));
+		Lat->DrawLatexNDC( 0.75,0.55, Form("QDC peak = %.1lf pC", TwlkQDCPeak[i]));
 		Lat->SetTextColor(602);
 		Lat->SetTextFont(42);
+		gPad->Update();
+		gPad->Modified();
+		Ln_RefQDCPeakFor1D[i]->SetY1( pow(10., gPad->GetUymin()) );
+		Ln_RefQDCPeakFor1D[i]->SetY2( pow(10., gPad->GetUymax()) );
+		Ln_RefQDCPeakFor1D[i]->Draw();
 	
 		Ca[0]->cd(i+3);
 		gPad->SetLogy(1);
@@ -689,6 +725,9 @@ void Twlk_Ana::Draw(){
 		h_2d_rawtq[i]->Draw("colz");
 		gPad->Update();
 		gPad->Modified();
+		Ln_RefQDCPeak[i]->Draw();
+		Ln_RefQDCCutForFit[i][0]->Draw();
+		Ln_RefQDCCutForFit[i][1]->Draw();
 		fr_2d_rawtq[i] = gPad->GetFrame();
 		fr_2d_rawtq[i] -> SetFillStyle(0);
 		fr_2d_rawtq[i] -> Draw();
@@ -716,6 +755,7 @@ void Twlk_Ana::Fit(){
 		Ca[i+4]->cd();
 		Ca[i+4]->SetLogz(1);
 		h_2d_rawtq_fit[i]->Draw("colz");
+		Ln_RefQDCPeak[i]->Draw();
 		
 		TF1* f_FitSlices = new TF1("f_FitSlices", "gaus(0)", -7., 7.);
 		h_2d_rawtq_fit[i]->FitSlicesY( f_FitSlices, 0, -1, 0, TwlkFitSliceOpt[i] );
@@ -796,11 +836,12 @@ void Twlk_Ana::SearchBest(){
 
 			Ca_dummy -> Destructor();
 
+			cout<<Form("Factor Ref1 & Ref2 >> %.3lf, %.3lf",TwlkFactor[0], TwlkFactor[1]);
 			if( TwlkSigVal_Tmp<TwlkSigVal_Best ){
 				TwlkSigVal_Best = TwlkSigVal_Tmp;
 				TwlkSigErr_Best = TwlkSigErr_Tmp;
 				for(int seg=0; seg<NofDet; seg++){TwlkFact_Best[seg] = TwlkFactor[seg];}
-				cout<<"Factor Ref1 & Ref2 >> "<<TwlkFactor[0]<<", "<<TwlkFactor[1]<<": "<<"sigma_TOF = "<<TwlkSigVal_Best<<" ns"<<endl;
+				cout<<": "<<"sigma_TOF = "<<TwlkSigVal_Best<<" ns";
 			}else;
 			h_2d_twlkfact->Fill( TwlkFactor[0], TwlkFactor[1], TwlkSigVal_Tmp );
 
@@ -812,7 +853,7 @@ void Twlk_Ana::SearchBest(){
 			if( TwlkRMS_Tmp<TwlkRMS_Best ){
 				TwlkRMS_Best = TwlkRMS_Tmp;
 			//	for(int seg=0; seg<NofDet; seg++){TwlkFact_Best[seg] = TwlkFactor[seg];}
-			//	cout<<"Factor Ref1 & Ref2 >> "<<TwlkFactor[0]<<", "<<TwlkFactor[1]<<": "<<"RMS_TOF = "<<TwlkRMS_Best<<" ns"<<endl;
+			//	cout<<": "<<"RMS_TOF = "<<TwlkSigVal_Best<<" ns";
 			}else;
 			h_2d_twlkfact_RMS->Fill( TwlkFactor[0], TwlkFactor[1], TwlkRMS_Tmp );
 
@@ -821,20 +862,20 @@ void Twlk_Ana::SearchBest(){
 			}else;
 			h_2d_twlkfact_Skew->Fill( TwlkFactor[0], TwlkFactor[1], TwlkSkew_Tmp );
 
-
+			cout<<endl;
 		}
 	}
 	h_2d_twlkfact             -> SetMinimum(TwlkSigVal_Best);
 	h_2d_twlkfact_Chis        -> SetMinimum(TwlkChisNDF_Best);
 	h_2d_twlkfact_RMS         -> SetMinimum(TwlkRMS_Best);
 	double MaximumTmp=0.;
-	MaximumTmp=h_2d_twlkfact->GetMaximumBin();
-	if(MaximumTmp>0.30){
-		h_2d_twlkfact->SetMaximum(0.30);
+	MaximumTmp=h_2d_twlkfact->GetMaximum();
+	if(MaximumTmp>0.25){
+		h_2d_twlkfact->SetMaximum(0.25);
 	}else;
-	MaximumTmp=h_2d_twlkfact_RMS->GetMaximumBin();
-	if(MaximumTmp>0.8){
-		h_2d_twlkfact_RMS->SetMaximum(0.8);
+	MaximumTmp=h_2d_twlkfact_RMS->GetMaximum();
+	if(MaximumTmp>1.0){
+		h_2d_twlkfact_RMS->SetMaximum(1.0);
 	}else;
 	gr_twlkfact->SetPoint( 0, TwlkFact_Best[0], TwlkFact_Best[1]);
 }
