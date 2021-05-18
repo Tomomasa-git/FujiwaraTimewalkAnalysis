@@ -90,7 +90,7 @@ Twlk_Ana::Twlk_Ana(int rnum, int phctype_1, int phctype_2){
 	}else if(RunNum==4000){
 		ItNum=3;
 	}else if(RunNum==4006){
-		ItNum=1;
+		ItNum=2;
 	}else;
 	
 	RootFile        = Form("../root/wararoot/wararoot%04d.root", RunNum);
@@ -818,7 +818,13 @@ void Twlk_Ana::Fit(){
 		for(int j=0; j<NPar; j++){
 			double fitVal = f_twlk[i]->GetParameter(j);
 			double fitErr = f_twlk[i]->GetParError(j);
-			Pt[i]->AddText( Form("#it{p}_{%d} = %.4lf #pm %.4lf", j, fitVal, fitErr));
+			TString StatTextFormat;
+			if(abs(fitVal)<1.E-3){
+				StatTextFormat = Form("#it{p}_{%d} = %lf #pm %lf", j, fitVal, fitErr);
+			}else{
+				StatTextFormat = Form("#it{p}_{%d} = %.4lf #pm %.4lf", j, fitVal, fitErr);
+			}
+			Pt[i]->AddText( StatTextFormat );
 		}
 		Pt[i]->Draw();
 	}
