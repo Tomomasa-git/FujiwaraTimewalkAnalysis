@@ -126,6 +126,7 @@ class Twlk_Ana{
 		TCanvas* Ca_dummy;
 		TH1D* h_1d_qdc_full[NofDet];
 		TH1D* h_1d_qdc_wcut[NofDet];
+		TH1D* h_1d_qdc_qcut[NofDet];
 		TH1D* h_1d_tdc_full[NofDet];
 		TH1D* h_1d_tdc_wcut[NofDet];
 		TH2D* h_2d_rawtq[NofDet];

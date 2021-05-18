@@ -190,7 +190,7 @@ double Twlk_Ana::Twlk_Correction( double x, double* parameter, double Coeff, int
 
 		case 8:
 		ret = Coeff*parameter[0]/sqrt(x-parameter[1]);
-		if(x<1.E-4){
+		if(x-parameter[1]<1.E-4){
 			ret=0.;
 		}else;
 		break;
@@ -409,14 +409,16 @@ void Twlk_Ana::DefineObj(){
 		//1-D histgram for QDC, TDC
 		h_1d_qdc_full[i] = new TH1D( Form("h_1d_qdc_full[%d]",i), Form("h_1d_qdc_full[%d]",i), TwlkQDCNBin, -10., TwlkQDCMax );
 		h_1d_qdc_wcut[i] = new TH1D( Form("h_1d_qdc_wcut[%d]",i), Form("h_1d_qdc_wcut[%d]",i), TwlkQDCNBin, -10., TwlkQDCMax );
+		h_1d_qdc_qcut[i] = new TH1D( Form("h_1d_qdc_qcut[%d]",i), Form("h_1d_qdc_qcut[%d]",i), TwlkQDCNBin, -10., TwlkQDCMax );
 		h_1d_tdc_full[i] = new TH1D( Form("h_1d_tdc_full[%d]",i), Form("h_1d_tdc_full[%d]",i), 4100, 100., 4200. );
 		h_1d_tdc_wcut[i] = new TH1D( Form("h_1d_tdc_wcut[%d]",i), Form("h_1d_tdc_wcut[%d]",i), 4100, 100., 4200. );
-		MySetting->Setting_Hist1D( h_1d_qdc_full[i], Form("run%04d: ", RunNum)+Label[CHassign[i]]+" QDC", Label[CHassign[i]]+" QDC (pC)"       , Form("Counts/%.2lf pC", TwlkQDCDiv), 2  , 1, 42, 616, 1001 );
-		MySetting->Setting_Hist1D( h_1d_qdc_wcut[i], Form("run%04d: ", RunNum)+Label[CHassign[i]]+" QDC", Label[CHassign[i]]+" QDC (pC)"       , Form("Counts/%.2lf pC", TwlkQDCDiv), 602, 1, 42, 422, 1001 );
+		MySetting->Setting_Hist1D( h_1d_qdc_full[i], Form("run%04d: ", RunNum)+Label[CHassign[i]]+" QDC"               , Label[CHassign[i]]+" QDC (pC)"       , Form("Counts/%.2lf pC", TwlkQDCDiv), 602, 1, 42, 616, 0    );
+		MySetting->Setting_Hist1D( h_1d_qdc_wcut[i], Form("run%04d: ", RunNum)+Label[CHassign[i]]+" QDC w/ TDC Cut"    , Label[CHassign[i]]+" QDC (pC)"       , Form("Counts/%.2lf pC", TwlkQDCDiv), 602, 1, 42, 422, 1001 );
+		MySetting->Setting_Hist1D( h_1d_qdc_qcut[i], Form("run%04d: ", RunNum)+Label[CHassign[i]]+" QDC w/ TDC+QDC Cut", Label[CHassign[i]]+" QDC (pC)"       , Form("Counts/%.2lf pC", TwlkQDCDiv), 602, 1, 42, 5  , 1001 );
 		MySetting->Setting_Hist1D( h_1d_tdc_full[i], Form("run%04d: ", RunNum)+Label[CHassign[i]]+" TDC", Label[CHassign[i]]+" TDC (ch./35 ps)", "Counts/ch."                       , 2  , 1, 42, 616, 1001 );
 		MySetting->Setting_Hist1D( h_1d_tdc_wcut[i], Form("run%04d: ", RunNum)+Label[CHassign[i]]+" TDC", Label[CHassign[i]]+" TDC (ch./35 ps)", "Counts/ch."                       , 602, 1, 42, 422, 1001 );
-		h_1d_qdc_full[i]->SetFillColorAlpha(616, 0.60);
-		h_1d_qdc_wcut[i]->SetFillColorAlpha(422, 0.80);
+		h_1d_qdc_wcut[i]->SetFillColorAlpha(422, 0.40);
+		h_1d_qdc_qcut[i]->SetFillColorAlpha(5  , 0.60);
 		h_1d_tdc_full[i]->SetFillColorAlpha(616, 0.60);
 		h_1d_tdc_wcut[i]->SetFillColorAlpha(422, 0.80);
 
@@ -443,7 +445,7 @@ void Twlk_Ana::DefineObj(){
 			}else;
 		}else;
 
-		Leg_qdc[i] = new TLegend( .55, .65, .85, .95, "Trigger Type: Effective Ent./Total Ent.");
+		Leg_qdc[i] = new TLegend( .55, .65, .85, .95, "#font[62]{Trigger Type} #scale[0.75]{(Eff.Ent./Total Event)}");
 		MySetting->Setting_Legend( Leg_qdc[i], 42, 22, 602, 0.040 );
 	//	Leg_qdc[i]->SetTextSize(0);
 		Leg_qdc[i]->SetBorderSize(0);
@@ -605,8 +607,39 @@ void Twlk_Ana::FillHist(){
 			h_1d_rawtof       -> Fill(rtof);
 			h_2d_rawtq[0]     -> Fill(Ref[0].e, rtof);
 			h_2d_rawtq[1]     -> Fill(Ref[1].e, rtof);
-			h_2d_rawtq_fit[0] -> Fill(Ref[0].e, rtof);
-			h_2d_rawtq_fit[1] -> Fill(Ref[1].e, rtof);
+		}else;
+	}
+
+	for(int i=0; i<NofDet; i++){
+		TwlkQDCPeak[i]=h_1d_qdc_wcut[i]->GetBinCenter( h_1d_qdc_wcut[i]->GetMaximumBin() );
+		TwlkQDCCutForFit[i][0] = 0.60*TwlkQDCPeak[i];
+		TwlkQDCCutForFit[i][1] = 1.80*TwlkQDCPeak[i];
+	}
+
+	for(int i=0; i<MaxEventItr; i++){
+		tree->GetEntry(EffectiveEvent[i]);
+		rtof = Ref[0].t-Ref[1].t;
+		if(
+			   Ref[0].qdc<4095
+			&& Ref[1].qdc<4095
+		){
+			//For Ref2QDC Cut
+			if(
+				   Ref[1].e>TwlkQDCCutForFit[1][0]
+				&& Ref[1].e<TwlkQDCCutForFit[1][1]
+			){
+				h_1d_qdc_qcut[1]  -> Fill(Ref[1].e);
+				h_2d_rawtq_fit[0] -> Fill(Ref[0].e, rtof);
+			}else;
+
+			//For Ref1QDC Cut
+			if(
+				   Ref[0].e>TwlkQDCCutForFit[0][0]
+				&& Ref[0].e<TwlkQDCCutForFit[0][1]
+			){
+				h_1d_qdc_qcut[0]  -> Fill(Ref[0].e);
+				h_2d_rawtq_fit[1] -> Fill(Ref[1].e, rtof);
+			}else;
 		}else;
 	}
 }
@@ -618,8 +651,10 @@ void Twlk_Ana::Draw(){
 		gPad->SetLogy(1);
 		h_1d_qdc_full[i]->SetStats(kFALSE);
 		h_1d_qdc_wcut[i]->SetStats(kFALSE);
-		Leg_qdc[i]->AddEntry( h_1d_qdc_full[i], Form("Full Event: %.0lf/%.0lf"        , h_1d_qdc_full[i]->GetEffectiveEntries(), h_1d_qdc_full[i]->GetEntries()), "fl");
-		Leg_qdc[i]->AddEntry( h_1d_qdc_wcut[i], Form("Ref1 #otimes Ref2: %.0lf/%.0lf", h_1d_qdc_wcut[i]->GetEffectiveEntries(), h_1d_qdc_wcut[i]->GetEntries()), "fl");
+		h_1d_qdc_qcut[i]->SetStats(kFALSE);
+		Leg_qdc[i]->AddEntry( h_1d_qdc_full[i], Form("Full Event: %.0lf/%.0lf"               , h_1d_qdc_full[i]->GetEffectiveEntries(), Ent), "l");
+		Leg_qdc[i]->AddEntry( h_1d_qdc_wcut[i], Form("Ref1 #otimes Ref2: %.0lf/%.0lf"        , h_1d_qdc_wcut[i]->GetEffectiveEntries(), Ent), "fl");
+		Leg_qdc[i]->AddEntry( h_1d_qdc_qcut[i], Form("Ref1 #otimes Ref2 w/ QDC Cut: %.0lf/%d", h_1d_qdc_qcut[i]->GetEffectiveEntries(), Ent), "fl");
 		h_1d_qdc_full[i]->Draw("");
 		h_1d_qdc_wcut[i]->Draw("same");
 		gPad->Update();
