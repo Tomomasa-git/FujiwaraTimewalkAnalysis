@@ -89,6 +89,8 @@ Twlk_Ana::Twlk_Ana(int rnum, int phctype_1, int phctype_2){
 		ItNum=1;
 	}else if(RunNum==4000){
 		ItNum=3;
+	}else if(RunNum==4006){
+		ItNum=1;
 	}else;
 	
 	RootFile        = Form("../root/wararoot/wararoot%04d.root", RunNum);
@@ -126,6 +128,8 @@ Twlk_Ana::Twlk_Ana(int rnum, int phctype_1, int phctype_2){
 		TwlkFitMin[0] = 5.;
 		TwlkFitSliceOpt[0] = "QNRG4";
 		TwlkFitSliceOpt[1] = "QNRG4";
+	}else if(RunNum==4006){
+		TwlkFitMin[0] = 7;
 	}else;
 }
 
@@ -195,6 +199,17 @@ double Twlk_Ana::Twlk_Correction( double x, double* parameter, double Coeff, int
 		}else;
 		break;
 		
+		case 9:
+		ret = Coeff*(parameter[0]/sqrt(x-parameter[1])+parameter[2]*x);
+		if(x-parameter[1]<1.E-4){
+			ret=0.;
+		}else;
+		break;
+
+		case 10:
+		ret = Coeff*parameter[0]*x;
+		break;
+
 		default:
 		ret = Coeff*parameter[0]/sqrt(x);
 		if(x<1.E-4){
@@ -272,6 +287,20 @@ void Twlk_Ana::SetTwlkRef1(int type){
 		TwlkInitialFitPar[0][2] = 1.0;
 		break;
 
+		case 9:
+		TwlkFuncType[0] = "[0]/sqrt(x-[1])+[2]*x+[3]";
+		TwlkNPar[0]=4;
+		TwlkInitialParSetFlag_Ref[0] = true;
+		TwlkInitialFitPar[0][0] = -2.0;
+		TwlkInitialFitPar[0][1] = 0.;
+		TwlkInitialFitPar[0][2] = 0.5;
+		TwlkInitialFitPar[0][2] = 1.0;
+		break;
+
+		case 10:
+		TwlkFuncType[0] = "[0]*x+[1]";
+		break;
+
 		default:
 		TwlkFuncType[0] = "[0]/sqrt(x)+[1]";
 		TwlkNPar[0]=2;
@@ -340,6 +369,20 @@ void Twlk_Ana::SetTwlkRef2(int type){
 		TwlkInitialFitPar[1][2] = 0.5;
 		break;
 
+		case 9:
+		TwlkFuncType[0] = "[0]/sqrt(x-[1])+[2]*x+[3]";
+		TwlkNPar[0]=4;
+		TwlkInitialParSetFlag_Ref[0] = true;
+		TwlkInitialFitPar[0][0] = 2.0;
+		TwlkInitialFitPar[0][1] = 0.;
+		TwlkInitialFitPar[0][2] = 0.5;
+		TwlkInitialFitPar[0][2] = 1.0;
+		break;
+
+		case 10:
+		TwlkFuncType[1] = "[0]*x+[1]";
+		break;
+
 		default:
 		TwlkFuncType[1] = "[0]/sqrt(x)+[1]";
 		TwlkNPar[0]=2;
@@ -393,7 +436,7 @@ void Twlk_Ana::ImportPedestal(){
 
 //--------------------------------------------------------------------------------------------------
 void Twlk_Ana::DefineCanv(){
-	for(int i=0; i<NofCanv-4; i++){Ca[i] = new TCanvas( Form("Ca[%d]",i), Form("Ca[%d]",i), 1602, 864 );}
+	for(int i=0; i<NofCanv-4; i++){Ca[i] = new TCanvas( Form("Ca[%d]",i), Form("Ca[%d]",i), 1602, 924 );}
 	Ca[NofCanv-4] = new TCanvas( Form("Ca[%d]", NofCanv-4), Form("Ca[%d]", NofCanv-4), 1602, 1624 );
 	Ca[NofCanv-3] = new TCanvas( Form("Ca[%d]", NofCanv-3), Form("Ca[%d]", NofCanv-3), 1602, 1624 );
 	Ca[NofCanv-2] = new TCanvas( Form("Ca[%d]", NofCanv-2), Form("Ca[%d]", NofCanv-2), 1602, 1624 );
@@ -416,9 +459,9 @@ void Twlk_Ana::DefineObj(){
 		h_1d_qdc_qcut[i] = new TH1D( Form("h_1d_qdc_qcut[%d]",i), Form("h_1d_qdc_qcut[%d]",i), TwlkQDCNBin, -10., TwlkQDCMax );
 		h_1d_tdc_full[i] = new TH1D( Form("h_1d_tdc_full[%d]",i), Form("h_1d_tdc_full[%d]",i), 4300, -100., 4200. );
 		h_1d_tdc_wcut[i] = new TH1D( Form("h_1d_tdc_wcut[%d]",i), Form("h_1d_tdc_wcut[%d]",i), 4300, -100., 4200. );
-		MySetting->Setting_Hist1D( h_1d_qdc_full[i], Form("run%04d: ", RunNum)+Label[CHassign[i]]+" QDC"               , Label[CHassign[i]]+" QDC (pC)"       , Form("Counts/%.2lf pC", TwlkQDCDiv), 602, 1, 42, 616, 0    );
-		MySetting->Setting_Hist1D( h_1d_qdc_wcut[i], Form("run%04d: ", RunNum)+Label[CHassign[i]]+" QDC w/ TDC Cut"    , Label[CHassign[i]]+" QDC (pC)"       , Form("Counts/%.2lf pC", TwlkQDCDiv), 602, 1, 42, 422, 1001 );
-		MySetting->Setting_Hist1D( h_1d_qdc_qcut[i], Form("run%04d: ", RunNum)+Label[CHassign[i]]+" QDC w/ TDC+QDC Cut", Label[CHassign[i]]+" QDC (pC)"       , Form("Counts/%.2lf pC", TwlkQDCDiv), 602, 1, 42, 5  , 1001 );
+		MySetting->Setting_Hist1D( h_1d_qdc_full[i], Form("run%04d: ", RunNum)+Label[CHassign[i]]+" QDC"               , Label[CHassign[i]]+" QDC (pC)"       , Form("Counts/%.2lf pC", TwlkQDCDiv), 1, 1, 42, 616, 0    );
+		MySetting->Setting_Hist1D( h_1d_qdc_wcut[i], Form("run%04d: ", RunNum)+Label[CHassign[i]]+" QDC w/ TDC Cut"    , Label[CHassign[i]]+" QDC (pC)"       , Form("Counts/%.2lf pC", TwlkQDCDiv), 4  , 1, 42, 422, 1001 );
+		MySetting->Setting_Hist1D( h_1d_qdc_qcut[i], Form("run%04d: ", RunNum)+Label[CHassign[i]]+" QDC w/ TDC+QDC Cut", Label[CHassign[i]]+" QDC (pC)"       , Form("Counts/%.2lf pC", TwlkQDCDiv), 860, 1, 42, 5  , 1001 );
 		MySetting->Setting_Hist1D( h_1d_tdc_full[i], Form("run%04d: ", RunNum)+Label[CHassign[i]]+" TDC", Label[CHassign[i]]+" TDC (ch./35 ps)", "Counts/ch."                       , 2  , 1, 42, 616, 1001 );
 		MySetting->Setting_Hist1D( h_1d_tdc_wcut[i], Form("run%04d: ", RunNum)+Label[CHassign[i]]+" TDC", Label[CHassign[i]]+" TDC (ch./35 ps)", "Counts/ch."                       , 602, 1, 42, 422, 1001 );
 		h_1d_qdc_wcut[i]->SetFillColorAlpha(422, 0.40);
@@ -449,8 +492,8 @@ void Twlk_Ana::DefineObj(){
 			}else;
 		}else;
 
-		Leg_qdc[i] = new TLegend( .45, .60, .90, .90, "#font[62]{Trigger Type} #scale[0.75]{(Eff.Ent./Total Event)}");
-		MySetting->Setting_Legend( Leg_qdc[i], 42, 12, 602, 0.040 );
+		Leg_qdc[i] = new TLegend( .55, .68, .90, .93, "#font[62]{Trigger Type} #scale[0.75]{(Eff.Ent./Total Event)}");
+		MySetting->Setting_Legend( Leg_qdc[i], 42, 12, 602, 0.0300 );
 		Leg_qdc[i]->SetBorderSize(0);
 		Leg_qdc[i]->SetLineWidth(0);
 		Leg_qdc[i]->SetFillColor(0);
@@ -479,8 +522,8 @@ void Twlk_Ana::DefineObj(){
 
 		Ln_RefQDCPeak[i]      = new TLine();
 		Ln_RefQDCPeakFor1D[i] = new TLine();
-		Ln_RefQDCCut[i] = new TLine();	//0: Upper Limit
-		Ln_RefQDCCutForFit[i][0] = new TLine();	//1: Lower Limit
+		Ln_RefQDCCut[i] = new TLine();
+		Ln_RefQDCCutForFit[i][0] = new TLine();	//0: Lower Limit
 		Ln_RefQDCCutForFit[i][1] = new TLine();	//1: Lower Limit
 
 		MySetting->Setting_Line( Ln_RefQDCPeak[i]           , 633, 1, 2 );
@@ -489,23 +532,24 @@ void Twlk_Ana::DefineObj(){
 		MySetting->Setting_Line( Ln_RefQDCCutForFit[i][1]   , 602, 1, 4 );
 		MySetting->Setting_Line( Ln_RefQDCCut[i]            , 602, 1, 4 );
 	}
+
 	h_1d_rawtof      = new TH1D( "h_1d_rawtof"     , "h_1d_rawtof"     , 400, -7., 7.);
 	h_1d_dectof_full = new TH1D( "h_1d_dectof_full", "h_1d_dectof_full", 200, -3.5, 3.5);
 	h_1d_dectof_wcut = new TH1D( "h_1d_dectof_wcut", "h_1d_dectof_wcut", 200, -3.5, 3.5);
 		
+	MySetting->Setting_Hist1D( h_1d_rawtof     , Form("#it{run%04d: RawTOF}"            ,RunNum), "TOF_{Ref1-Ref2} (ns)", "Counts/0.035 ns", 843, 1, 42, 406, 1001 );
+	MySetting->Setting_Hist1D( h_1d_dectof_full, Form("#it{run%04d: DecTOF w/o QDC cut}",RunNum), "TOF_{Ref1-Ref2} (ns)", "Counts/0.035 ns", 4  , 1, 42, 422, 1001 );
+	MySetting->Setting_Hist1D( h_1d_dectof_wcut, Form("#it{run%04d: DecTOF w/ QDC cut}" ,RunNum), "TOF_{Ref1-Ref2} (ns)", "Counts/0.035 ns", 4  , 1, 42, 422, 1001 );
+	h_1d_rawtof      -> GetXaxis() -> SetNdivisions(515);
+	h_1d_dectof_full -> GetXaxis() -> SetNdivisions(515);
+	h_1d_dectof_wcut -> GetXaxis() -> SetNdivisions(515);
+
+
 	h_2d_twlkfact             = new TH2D( "h_2d_twlkfact"            , "h_2d_twlkfact"            , 101, -0.0125, 2.5125, 101, -0.0125, 2.5125 );
 	h_2d_twlkfact_Chis        = new TH2D( "h_2d_twlkfact_Chis"       , "h_2d_twlkfact_Chis"       , 101, -0.0125, 2.5125, 101, -0.0125, 2.5125 );
 	h_2d_twlkfact_RMS         = new TH2D( "h_2d_twlkfact_RMS"        , "h_2d_twlkfact_RMS"        , 101, -0.0125, 2.5125, 101, -0.0125, 2.5125 );
 	h_2d_twlkfact_Skew        = new TH2D( "h_2d_twlkfact_Skew"       , "h_2d_twlkfact_Skew"       , 101, -0.0125, 2.5125, 101, -0.0125, 2.5125 );
 	h_2d_twlkfact_ChisConsFit = new TH2D( "h_2d_twlkfact_ChisConsFit", "h_2d_twlkfact_ChisConsFit", 101, -0.0125, 2.5125, 101, -0.0125, 2.5125 );
-
-	MySetting->Setting_Hist1D( h_1d_rawtof     , Form("run%04d: RawTOF"            ,RunNum), "TOF_{Ref1-Ref2} (ns)", "Counts/0.035 ns", 843, 1, 42, 406, 1001 );
-	MySetting->Setting_Hist1D( h_1d_dectof_full, Form("run%04d: DecTOF w/o QDC cut",RunNum), "TOF_{Ref1-Ref2} (ns)", "Counts/0.035 ns", 4  , 1, 42, 422, 1001 );
-	MySetting->Setting_Hist1D( h_1d_dectof_wcut, Form("run%04d: DecTOF w/ QDC cut" ,RunNum), "TOF_{Ref1-Ref2} (ns)", "Counts/0.035 ns", 4  , 1, 42, 422, 1001 );
-	h_1d_rawtof      -> GetXaxis() -> SetNdivisions(515);
-	h_1d_dectof_full -> GetXaxis() -> SetNdivisions(515);
-	h_1d_dectof_wcut -> GetXaxis() -> SetNdivisions(515);
-
 
 	//=== h_2d_twlkfact ====
 	MySetting->Setting_Hist2D( h_2d_twlkfact, "Factor Ref1 vs. Ref2 (#sigma_{Ref1-Ref2})", "Ref1", "Ref2", "#sigma_{Ref1-Ref2} (ns)", 0. );
@@ -573,14 +617,6 @@ void Twlk_Ana::DefineObj(){
 	h_2d_twlkfact_Skew->GetZaxis()->SetTitleSize(0.030);
 	h_2d_twlkfact_Skew->GetZaxis()->SetTitleFont(62);
 	h_2d_twlkfact_Skew->GetZaxis()->SetLabelFont(42);
-
-	MySetting->Setting_Hist2D( h_2d_twlkfact_ChisConsFit, "Factor Ref1 vs. Ref2 (#chi^{2}/NDF for Conts. fit)", "Ref1", "Ref2", "ln(#chi^{2}/NDF_{Const. fit})", 0. );
-	h_2d_twlkfact_ChisConsFit->GetXaxis()->SetLabelSize(0.025);
-	h_2d_twlkfact_ChisConsFit->GetYaxis()->SetLabelSize(0.025);
-	h_2d_twlkfact_ChisConsFit->GetZaxis()->SetLabelSize(0.020);
-	h_2d_twlkfact_ChisConsFit->GetZaxis()->SetTitleSize(0.030);
-	h_2d_twlkfact_ChisConsFit->GetYaxis()->SetTitleOffset( 1.20*h_2d_twlkfact_Chis->GetYaxis()->GetTitleOffset() );
-
 
 	gr_twlkfact = new TGraph();
 	MySetting->Setting_Graph( gr_twlkfact,"Factor Ref1 vs. Ref2", "Ref1", "Ref2",6, 1, 42, 6, 29 );
@@ -683,9 +719,9 @@ void Twlk_Ana::Draw(){
 		h_1d_qdc_full[i]->SetStats(kFALSE);
 		h_1d_qdc_wcut[i]->SetStats(kFALSE);
 		h_1d_qdc_qcut[i]->SetStats(kFALSE);
-		Leg_qdc[i]->AddEntry( h_1d_qdc_full[i], Form("Full Event: #scale[0.85]{(%.0lf/%d)}"                  , h_1d_qdc_full[i]->GetEffectiveEntries(), Ent), "l" );
-		Leg_qdc[i]->AddEntry( h_1d_qdc_wcut[i], Form("Ref1 #otimes Ref2: #scale[0.85]{(%.0lf/%d)}"           , h_1d_qdc_wcut[i]->GetEffectiveEntries(), Ent), "fl");
-		Leg_qdc[i]->AddEntry( h_1d_qdc_qcut[i], Form("Ref1 #otimes Ref2 w/ QDC Cut: #scale[0.85]{(%.0lf/%d)}", h_1d_qdc_qcut[i]->GetEffectiveEntries(), Ent), "fl");
+		Leg_qdc[i]->AddEntry( h_1d_qdc_full[i], Form("Full Event #scale[0.85]{(%.0lf/%d)}"                  , h_1d_qdc_full[i]->GetEffectiveEntries(), Ent), "l" );
+		Leg_qdc[i]->AddEntry( h_1d_qdc_wcut[i], Form("Ref1 #otimes Ref2 #scale[0.85]{(%.0lf/%d)}"           , h_1d_qdc_wcut[i]->GetEffectiveEntries(), Ent), "fl");
+		Leg_qdc[i]->AddEntry( h_1d_qdc_qcut[i], Form("Ref1 #otimes Ref2 w/ QDC Cut #scale[0.85]{(%.0lf/%d)}", h_1d_qdc_qcut[i]->GetEffectiveEntries(), Ent), "fl");
 		h_1d_qdc_full[i]->Draw("");
 		h_1d_qdc_wcut[i]->Draw("same");
 		h_1d_qdc_qcut[i]->Draw("same");
@@ -697,7 +733,11 @@ void Twlk_Ana::Draw(){
 		Leg_qdc[i]->Draw();
 		Lat->SetTextColor(2);
 		Lat->SetTextFont(62);
-		Lat->DrawLatexNDC( 0.75,0.55, Form("QDC peak = %.1lf pC", TwlkQDCPeak[i]));
+		Lat->DrawLatexNDC( 0.70,0.60, Form("#scale[1.15]{Ref%d QDC peak = %.1lf pC}", i+1, TwlkQDCPeak[i]));
+		Lat->SetTextAlign(12);
+		Lat->DrawLatexNDC( 0.60,0.53, Form("#scale[0.75]{QDC Cut Low. Lim. = %.2lf pC}", TwlkQDCCutForFit[i][0]));
+		Lat->DrawLatexNDC( 0.60,0.47, Form("#scale[0.75]{QDC Cut Upp. Lim. = %.2lf pC}", TwlkQDCCutForFit[i][1]));
+		Lat->SetTextAlign(22);
 		Lat->SetTextColor(602);
 		Lat->SetTextFont(42);
 		gPad->Update();
@@ -774,6 +814,7 @@ void Twlk_Ana::Fit(){
 		fr_2d_rawtq_fit[i] -> Draw();
 		gPad->Update();
 		Pt[i] -> AddText( Form("#chi^{2}/NDF= %.1lf/%d", f_twlk[i]->GetChisquare(), f_twlk[i]->GetNDF()) );
+		if(NPar>3){Pt[i]->SetTextSize( 0.80*(Pt[i]->GetTextSize()) );}
 		for(int j=0; j<NPar; j++){
 			double fitVal = f_twlk[i]->GetParameter(j);
 			double fitErr = f_twlk[i]->GetParError(j);

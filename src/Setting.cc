@@ -130,6 +130,7 @@ void Setting::Setting_Gene( int BatchFlag ){
 void Setting::Setting_Hist1D( TH1D *hist, TString HTitle, TString XTitle, TString YTitle, int LCol, int LSty, int Font, int FCol, int FSty ){
 	hist->SetTitle(HTitle);
 	hist->SetLineColor(LCol);
+	hist->SetLineStyle(LSty);
 	hist->SetLineWidth(1);
 	hist->SetTitleSize(0.04,"");
 //	hist->SetTitleFont(Font,"");
