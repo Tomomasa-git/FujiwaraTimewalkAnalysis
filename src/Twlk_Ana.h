@@ -204,12 +204,18 @@ class Twlk_Ana{
 		double pede_v[NofMPPC];
 		double pede_w[NofMPPC];
 
+		int TwlkTDCGate[NofDet][2] = { {1900, 2200}, {1900, 2200}};
+		double TwlkTOFAxisLim[2] ={-7., 7.};
+
 		int TwlkMode=0;
 		int Ref1TwlkMode=0;
 		int Ref2TwlkMode=0;
 		bool TwlkInitialParSetFlag=false;
 		bool TwlkInitialParSetFlag_Ref[NofDet]={false, false};
 		double TwlkInitialFitPar[NofDet][9];
+
+		double TwlkQDCPeak[NofDet];
+		double TwlkQDCCutForFit[NofDet][2]={{30.,70.},{50.,160.}};
 
 		TString TwlkFitSliceOpt[NofDet] = {"QNRG4", "QNRG4"};
 		TString TwlkFuncType[NofDet];

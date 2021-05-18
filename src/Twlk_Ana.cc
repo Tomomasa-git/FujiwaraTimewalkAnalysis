@@ -73,7 +73,6 @@ Twlk_Ana::Twlk_Ana(int rnum, int phctype_1, int phctype_2){
 	gStyle->SetStatY(.900);
 
 	RunNum = rnum;
-//	TwlkMode=phctype;
 
 	Ref1TwlkMode=phctype_1;
 	Ref2TwlkMode=phctype_2;
@@ -401,12 +400,6 @@ void Twlk_Ana::DefineCanv(){
 	Ca[NofCanv-2] = new TCanvas( Form("Ca[%d]", NofCanv-2), Form("Ca[%d]", NofCanv-2), 1602, 1624 );
 	Ca[NofCanv-1] = new TCanvas( Form("Ca[%d]", NofCanv-1), Form("Ca[%d]", NofCanv-1), 1602, 1624 );
 	Ca[0]->Divide(2,2);
-	//	Ca[11]->Divide(2,1);
-	//	Ca[1]->Divide(2,2);
-	//	Ca[2]->Divide(2,2);
-	//	Ca[3]->Divide(2,2);
-	//	Ca[5]->Divide(2,2);
-	//	Ca[7]->Divide(2,1);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -688,13 +681,6 @@ void Twlk_Ana::Fit(){
 		h_1d_rawtq_slice[i] -> SetLineColor(1);
 		h_1d_rawtq_slice[i] -> Draw("samePES");
 	
-	/*	
-		if( (RunNum==1070)&&(i==0) ){
-			for(int j=0; j<100; j++){h_2d_rawtq_fit[i]->Fit( f_twlk[i], "", "", TwlkFitMin[i], TwlkFitMax[i] );}
-		}else{
-			for(int j=0; j<100; j++){h_1d_rawtq_slice[i]->Fit( f_twlk[i], "", "", TwlkFitMin[i], TwlkFitMax[i] );}
-		}
-	*/
 		for(int j=0; j<100; j++){h_1d_rawtq_slice[i]->Fit( f_twlk[i], "", "", TwlkFitMin[i], TwlkFitMax[i] );}
 		int NPar = f_twlk[i]->GetNpar();
 		for(int j=0; j<NPar; j++){Twlk[i][j]=f_twlk[i]->GetParameter(j);}
@@ -732,21 +718,12 @@ void Twlk_Ana::SearchBest(){
 			TwlkFactor[1] = 0. + TwlkDelta*j;
 
 			h_1d_dectof_tmp = new TH1D( "h_1d_dectof_tmp", "h_1d_dectof_tmp", 400, -7., 7. );
-			for(int k=0; k<NofDet; k++){
-				h_2d_dectq_tmp[k] = new TH2D( Form("h_2d_dectq_tmp[%d]",k), Form("h_2d_dectq_tmp[%d]",k), TwlkQDCNBin, -10., TwlkQDCMax, 200, -7., 7. );
-			}
 			
 			for(int k=0; k<MaxEventItr; k++){
 				tree->GetEntry(EffectiveEvent[k]);
 				decTime[0] = Ref[0].t-Twlk_Correction( Ref[0].e, Twlk[0], TwlkFactor[0], Ref1TwlkMode );
 				decTime[1] = Ref[1].t+Twlk_Correction( Ref[1].e, Twlk[1], TwlkFactor[1], Ref2TwlkMode );
 				dtof = decTime[0]-decTime[1];
-			//	if(
-			//		   Ref1.e > TwlkRefQDCCutLim[0]
-			//		&& Ref22.e > TwlkRefQDCCutLim[1]
-			//	){
-			//		h_1d_dectof_tmp->Fill(dtof);
-			//	}else;
 				h_1d_dectof_tmp->Fill(dtof);
 				for(int seg=0; seg<NofDet; seg++){
 					h_2d_dectq_tmp[seg]->Fill(Ref[seg].e, dtof);
@@ -776,24 +753,7 @@ void Twlk_Ana::SearchBest(){
 			TwlkSkew_Tmp = h_1d_dectof_tmp->GetSkewness();
 
 			h_1d_dectof_tmp -> Delete();
-		//	Ca_dummy -> Destructor();
 
-		//	for(int seg=0; seg<NofDet; seg++){
-		//		TF1* f_FitSlices = new TF1("f_FitSlices", "gaus(0)", -7., 7.);
-		//		f_const_tmp[seg]->SetParameter(0, Par_tmp);
-		//		h_2d_dectq_tmp[seg]->FitSlicesY(f_FitSlices, 0, -1, 0, "QNRG4");
-		//		h_1d_dectq_slice_tmp[seg]=(TH1D*)gROOT->FindObject( Form("h_2d_dectq_tmp[%d]_1", seg) );
-		//		for(int Itr=0; Itr<FitItrTmp; Itr++){
-		//			h_1d_dectq_slice_tmp[seg]->Fit(f_const_tmp[seg], "Q", "", -10., TwlkQDCMax);
-		//			Par_tmp = f_const_tmp[seg]->GetParameter(0);
-		//		}
-		//		TwlkChisNDF_ConsFit_Sep_Tmp[seg]=(f_const_tmp[seg]->GetChisquare())/(f_const_tmp[seg]->GetNDF());
-		//	}
-		//	TwlkChisNDF_ConsFit_Ave_Tmp = log( sqrt(TwlkChisNDF_ConsFit_Sep_Tmp[0]*TwlkChisNDF_ConsFit_Sep_Tmp[1]) );
-			for(int seg=0; seg<NofDet; seg++){
-				h_2d_dectq_tmp[seg]->Delete();
-			//	h_1d_dectq_slice_tmp[seg]->Delete();
-			}
 			Ca_dummy -> Destructor();
 
 			if( TwlkSigVal_Tmp<TwlkSigVal_Best ){
@@ -819,26 +779,23 @@ void Twlk_Ana::SearchBest(){
 			if( abs(TwlkSkew_Tmp)<abs(TwlkSkew_Best) ){
 				TwlkSkew_Best = TwlkSkew_Tmp;
 			}else;
-		//	double SkewTmp = h_2d_twlkfact_Skew->GetSkewness();
-		//	if(TwlkSkew_Tmp<SkewTmp){
-		//		h_2d_twlkfact_Skew->SetMinimum(TwlkSkew_Tmp);
-		//	}else;
 			h_2d_twlkfact_Skew->Fill( TwlkFactor[0], TwlkFactor[1], TwlkSkew_Tmp );
 
-		//	if( TwlkChisNDF_ConsFit_Ave_Tmp<TwlkChisNDF_ConsFit_Ave_Best ){
-		//		TwlkChisNDF_ConsFit_Ave_Best = TwlkChisNDF_ConsFit_Ave_Tmp;
-		//	//	for(int seg=0; seg<NofDet; seg++){TwlkFact_Best[seg] = TwlkFactor[seg];}
-		//	//	cout<<"Factor Ref1 & Ref2 >> "<<TwlkFactor[0]<<", "<<TwlkFactor[1]<<": "<<"Chis/NDF = "<<TwlkChisNDF_ConsFit_Ave_Best<<endl;
-		//	}else;
-		//	h_2d_twlkfact_ChisConsFit->Fill( TwlkFactor[0], TwlkFactor[1], TwlkChisNDF_ConsFit_Ave_Tmp );
 
 		}
 	}
 	h_2d_twlkfact             -> SetMinimum(TwlkSigVal_Best);
 	h_2d_twlkfact_Chis        -> SetMinimum(TwlkChisNDF_Best);
 	h_2d_twlkfact_RMS         -> SetMinimum(TwlkRMS_Best);
-//	h_2d_twlkfact_ChisConsFit -> SetMinimum(TwlkChisNDF_ConsFit_Ave_Best);
-//	h_2d_twlkfact_Skew -> SetMinimum();
+	double MaximumTmp=0.;
+	MaximumTmp=h_2d_twlkfact->GetMaximumBin();
+	if(MaximumTmp>0.30){
+		h_2d_twlkfact->SetMaximum(0.30);
+	}else;
+	MaximumTmp=h_2d_twlkfact_RMS->GetMaximumBin();
+	if(MaximumTmp>0.8){
+		h_2d_twlkfact_RMS->SetMaximum(0.8);
+	}else;
 	gr_twlkfact->SetPoint( 0, TwlkFact_Best[0], TwlkFact_Best[1]);
 }
 /*
@@ -977,20 +934,6 @@ void Twlk_Ana::DecTOF(){
 	Lat->SetTextColor(6);
 	Lat->DrawLatex( TwlkFact_Best[0], TwlkFact_Best[1]+0.20, Form("(%.3lf, %.3lf)", TwlkFact_Best[0], TwlkFact_Best[1]));
 
-//	Ca[18]->cd();
-//	Ca[18]->SetGrid(0,0);
-//	gPad->SetRightMargin(.135);
-//	gPad->SetLeftMargin(.125);
-//	gPad->SetTopMargin(.105);
-//	gPad->SetBottomMargin(.155);
-//	gPad->SetLogz(1);
-//	h_2d_twlkfact_ChisConsFit->SetStats(kFALSE);
-//	h_2d_twlkfact_ChisConsFit->SetMaximum(10.);
-//	h_2d_twlkfact_ChisConsFit->Draw("colz");
-//	gr_twlkfact->Draw("sameP");
-//	Lat->SetTextColor(6);
-//	Lat->DrawLatex( TwlkFact_Best[0], TwlkFact_Best[1]+0.20, Form("(%.3lf, %.3lf)", TwlkFact_Best[0], TwlkFact_Best[1]));
-
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1045,7 +988,7 @@ void Twlk_Ana::Export(){
 		////Ref1
 		Ex_Ref1.tdc = Ref[0].tdc;
 		Ex_Ref1.qdc = Ref[0].qdc;
-		Ex_Ref1.t   = Ref[0].t-Twlk_Correction( Ref[0].e, Twlk[0], TwlkFactor[0], Ref1TwlkMode );;
+		Ex_Ref1.t   = Ref[0].t-Twlk_Correction( Ref[0].e, Twlk[0], TwlkFactor[0], Ref1TwlkMode );
 		Ex_Ref1.e   = Ref[0].e;
 		////Ref2
 		Ex_Ref2.tdc = Ref[1].tdc;
@@ -1061,6 +1004,7 @@ void Twlk_Ana::Export(){
 		ofp_dat->cd();
 		tree_Ex->Fill();
 	}
+	tree_Ex->Write();
 	ofp_dat->Close();
 
 	ofs_twlk.open( Param_Twlk.c_str(), ios_base::trunc );
