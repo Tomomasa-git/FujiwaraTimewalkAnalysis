@@ -98,7 +98,6 @@ Twlk_Ana::Twlk_Ana(int rnum, int phctype_1, int phctype_2){
 	RootFile_Ex_obj = Form("../root/Export/ana_wararoot%04d_%03d_obj.root", RunNum, ItNum);
 	RootFile_Ex_dat = Form("../root/Export/ana_wararoot%04d_%03d_dat.root", RunNum, ItNum);
 	Param_Twlk      = Form("../param/twlk/ana_wararoot%04d_%03d.dat"      , RunNum, ItNum);
-//	Param_Pede = Form("../param/pede/pedestal_run%04d_%03d.dat", RunNum, ItNum);
 	
 	TwlkDelta=0.025;
 	TwlkQDCNBin=410;
@@ -1079,22 +1078,34 @@ int main(int argc, char** argv){
 	int runnum=1068;
 	int Mode_1=0;
 	int Mode_2=0;
+	int AnaType = 0;
 
 	if(argc==2){
-		runnum=atoi(argv[1]);
+		runnum = atoi(argv[1]);
 	}else if(argc==3){
-		runnum = atoi(argv[1]);
-		Mode_1 = atoi(argv[2]);
+		runnum  = atoi(argv[1]);
+		AnaType = atoi(argv[2]);
 	}else if(argc==4){
-		runnum = atoi(argv[1]);
-		Mode_1 = atoi(argv[2]);
-		Mode_2 = atoi(argv[3]);
+		runnum  = atoi(argv[1]);
+		AnaType = atoi(argv[2]);
+		Mode_1  = atoi(argv[3]);
+	}else if(argc==5){
+		runnum  = atoi(argv[1]);
+		AnaType = atoi(argv[2]);
+		Mode_1  = atoi(argv[3]);
+		Mode_2  = atoi(argv[4]);
 	}else{
 		runnum = 1068;
-		Mode_1 = 8;
-		Mode_2 = 8;
+		AnaType = 0;
+		Mode_1 = 0;
+		Mode_2 = 0;
 	}
 
+	if(AnaType>=2){
+		AnaType=1;
+	}else if(AnaType<0){
+		AnaType = 1;
+	}
 
 	TApplication* theApp;
 	Twlk_Ana* ana;
@@ -1110,8 +1121,14 @@ int main(int argc, char** argv){
 	ana->FillHist();
 	ana->Draw();
 	ana->Fit();
-	ana->SearchBest();
-	ana->DecTOF();
+	if(AnaType==1){
+		cout<<"-----oooOOOOO0OOOOOooo-----"<<endl;
+		cout<<"-----oooOOOOO0OOOOOooo-----"<<endl;
+		cout<<"-----oooOOOOO0OOOOOooo-----"<<endl;
+	}else{
+		ana->SearchBest();
+		ana->DecTOF();
+	}
 	ana->Export();
 
 	delete ana;
